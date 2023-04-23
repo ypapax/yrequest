@@ -79,7 +79,7 @@ func Response(job *Job, requestTimeout time.Duration) (*Result, error) {
 	if res.StatusCode > 399 || res.StatusCode < 200 {
 		bodyText := string(b)
 		const maxBodyTextChars = 2500
-		var bodyTextForErr string
+		var bodyTextForErr = bodyText
 		if utf8.RuneCountInString(bodyText) > maxBodyTextChars {
 			bodyTextForErr = string([]rune(bodyText)[:maxBodyTextChars])
 		}
