@@ -71,15 +71,13 @@ func Response(job *Job, requestTimeout time.Duration) (*Result, error) {
 	}
 	l.Tracef("request is done: %+v", res.StatusCode)
 
+	defer res.Body.Close()
+	b, err2 := io.ReadAll(res.Body)
+	if err2 != nil {
+		return nil, errors.WithStack(err)
+	}
 	if res.StatusCode > 399 || res.StatusCode < 200 {
-		var bodyText string
-		defer res.Body.Close()
-		b, err2 := io.ReadAll(res.Body)
-		if err2 != nil {
-			bodyText = fmt.Sprintf("couldn't get body: %+v", err2)
-		} else {
-			bodyText = string(b)
-		}
+		bodyText := string(b)
 		const maxBodyTextChars = 2500
 		var bodyTextForErr string
 		if utf8.RuneCountInString(bodyText) > maxBodyTextChars {
@@ -88,6 +86,6 @@ func Response(job *Job, requestTimeout time.Duration) (*Result, error) {
 		errB := errors.WithStack(fmt.Errorf("not good status code %+v requesting %+v, bodyTextForErr: %+v", res.StatusCode, job, bodyTextForErr))
 		return &Result{Job: *job, Body: []byte(bodyText), StatusCode: res.StatusCode, Header: res.Header, Response: res}, errB
 	}
-	return &Result{Job: *job, StatusCode: res.StatusCode, Header: res.Header, Response: res}, nil
+	return &Result{Job: *job, StatusCode: res.StatusCode, Header: res.Header, Response: res, Body: b}, nil
 }
 
