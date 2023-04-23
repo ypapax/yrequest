@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 	"unicode/utf8"
 )
@@ -66,8 +67,7 @@ func Response(job *Job, requestTimeout time.Duration) (*Result, error) {
 	if err != nil {
 		err = errors.Wrapf(err, "couldn't make request for req %s and timeout: %s, time spent: %+v",
 			job.CurlStr, requestTimeout, time.Since(t1))
-		l.Tracef("error: %+v", err)
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	l.Tracef("request is done: %+v", res.StatusCode)
 
@@ -89,3 +89,13 @@ func Response(job *Job, requestTimeout time.Duration) (*Result, error) {
 	return &Result{Job: *job, StatusCode: res.StatusCode, Header: res.Header, Response: res, Body: b}, nil
 }
 
+func (r *Result) String() string {
+	return fmt.Sprintf("status: %+v, job: %+v", r.StatusCode, r.Job)
+}
+
+func (j Job) String() string {
+	if len(j.CurlStr) > 0 {
+		return j.CurlStr
+	}
+	return strings.Join([]string{j.Method, j.Url}, " ")
+}
