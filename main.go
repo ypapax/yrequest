@@ -61,7 +61,7 @@ func Response(job *Job, requestTimeout time.Duration) (*Result, error) {
 	logrus.Tracef("requesting %+v", job)
 	res, err := client.Do(req)
 	defer func() {
-		logrus.Infof("request is finished for %s: %+v", time.Since(t1), job)
+		logrus.Tracef("request is finished for %s: %+v", time.Since(t1), job)
 	}()
 	if err != nil {
 		err = errors.Wrapf(err, "couldn't make request for req %s and timeout: %s, time spent: %+v",
