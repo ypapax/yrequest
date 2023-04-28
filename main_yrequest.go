@@ -43,7 +43,11 @@ func Response(job *Job, requestTimeout time.Duration) (*Result, error) {
 	client := &http.Client{
 		Timeout: requestTimeout,
 	}
-	req, err := http.NewRequest(job.Method, job.Url, bytes.NewBuffer(job.Payload))
+	var bts *bytes.Buffer
+	if len(job.Payload) > 0 {
+		bts = bytes.NewBuffer(job.Payload)
+	}
+	req, err := http.NewRequest(job.Method, job.Url, bts)
 	if err != nil {
 		errN := errors.Wrap(err, "couldn't create request")
 		return nil, errN
